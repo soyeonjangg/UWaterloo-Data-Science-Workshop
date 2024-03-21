@@ -1,0 +1,6 @@
+tqdm
+pandas
+numpy
+matplotlib
+tensorboardX
+python==3.11.0
