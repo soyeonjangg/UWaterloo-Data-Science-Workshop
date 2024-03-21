@@ -50,13 +50,13 @@ def train(model, train_dataloader, criterion, optimizer):
     return epoch_loss, epoch_acc
 
 
-def validate(model, test_dataloader, criterion):
+def validate(model, val_dataloader, criterion):
     running_loss = 0.0
     running_corrects = 0
 
     model.eval()  # switches layer to evaluation . eg. nn.Dropout() disabled
     with torch.no_grad():
-        for data in tqdm(test_dataloader):
+        for data in tqdm(val_dataloader):
             # get the inputs
             inputs, labels = data
 
@@ -70,8 +70,8 @@ def validate(model, test_dataloader, criterion):
             running_loss += loss.item()
             running_corrects += torch.sum(preds == labels.data)
 
-        epoch_loss = running_loss / (len(test_dataloader) * batch_size)
-        epoch_acc = running_corrects / (len(test_dataloader) * batch_size)
+        epoch_loss = running_loss / (len(val_dataloader) * batch_size)
+        epoch_acc = running_corrects / (len(val_dataloader) * batch_size)
 
     return epoch_loss, epoch_acc
 
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     working_dir = "./data"
 
     pets_path_train = os.path.join(working_dir, "OxfordPets", "train")
-    pets_path_test = os.path.join(working_dir, "OxfordPets", "test")
+    pets_path_val = os.path.join(working_dir, "OxfordPets", "validation")
 
     data_transforms = {
         "Training": T.Compose(
@@ -94,7 +94,7 @@ if __name__ == "__main__":
                 T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
             ]
         ),
-        "Testing": T.Compose(
+        "Validation": T.Compose(
             [
                 T.Resize(256),
                 T.CenterCrop(224),
@@ -111,21 +111,21 @@ if __name__ == "__main__":
         download=True,
         transform=data_transforms["Training"],
     )
-    pets_test = torchvision.datasets.OxfordIIITPet(
-        root=pets_path_train,
+    pets_val = torchvision.datasets.OxfordIIITPet(
+        root=pets_path_val,
         split="test",
         target_types="category",
         download=True,
-        transform=data_transforms["Testing"],
+        transform=data_transforms["Validation"],
     )
 
     batch_size = 8
 
     train_dataloader = DataLoader(pets_train, batch_size=batch_size, shuffle=True)
-    test_dataloader = DataLoader(pets_test, batch_size=batch_size, shuffle=True)
+    val_dataloader = DataLoader(pets_val, batch_size=batch_size, shuffle=True)
 
-    train_writer = tensorboardX.SummaryWriter()
-    val_writer = tensorboardX.SummaryWriter()
+    train_writer = tensorboardX.SummaryWriter(logdir="./runs/train")
+    val_writer = tensorboardX.SummaryWriter(logdir="./runs/validation")
 
     model_ft = models.resnet18(
         weights=ResNet18_Weights.DEFAULT
@@ -169,7 +169,7 @@ if __name__ == "__main__":
         train_acc.append(train_acc.append)
 
         phase = "Validation"
-        epoch_val_err, epoch_val_acc = validate(model_ft, test_dataloader, criterion)
+        epoch_val_err, epoch_val_acc = validate(model_ft, val_dataloader, criterion)
         print("{} Loss: {:.4f} Acc: {:.4f}".format(phase, epoch_val_err, epoch_val_acc))
         val_err.append(epoch_val_err)
         val_acc.append(epoch_val_acc)
