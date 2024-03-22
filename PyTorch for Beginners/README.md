@@ -8,6 +8,6 @@ The goal of this workshop was to introduce PyTorch. Although the initial intenti
 ## YouTube
 The workshop was unfortunately not recorded but when I have the time, I will for sure try to record it and reuquest to upload it on YT!
 
-### References
-https://pytorch.org/tutorials/
-https://github.com/Muhammad-MujtabaSaeed/Stanford-Dogs-Classification
+## References
+- https://pytorch.org/tutorials/
+- https://github.com/Muhammad-MujtabaSaeed/Stanford-Dogs-Classification
